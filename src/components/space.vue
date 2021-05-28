@@ -6,6 +6,7 @@
 
 <script>
 import * as THREE from "three";
+import { MapControls } from "three/examples/jsm/controls/OrbitControls";
 
 export default {
   name: "space",
@@ -22,7 +23,19 @@ export default {
     };
   },
   mounted() {
+    let that = this;
+
     this.Awake();
+
+    //função resize que atualiza o tamanho da tela
+    window.addEventListener("resize", onWindowResize, false);
+    function onWindowResize() {
+      that.camera.aspect = window.innerWidth / window.innerHeight;
+      that.camera.updateProjectionMatrix();
+      that.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    onWindowResize();
   },
   methods: {
     Awake() {
@@ -39,6 +52,7 @@ export default {
         1,
         100
       );
+      //posição(x,y,z)
       this.camera.position.set(8, 4, 0);
 
       //inicializa grupo de objetos
@@ -66,12 +80,41 @@ export default {
         new THREE.Color(0x555555),
         new THREE.Color(0x333333)
       );
-      this.scene.add(GridHelper);
+      this.scene.add(gridHelper);
 
       //adicionando uma mesh geometry para teste
       let geometry = new THREE.BoxGeometry(1, 1, 1);
       let material = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
-      let mesh = new THREE.Mesh(geometry.material);
+      let mesh = new THREE.Mesh(geometry, material);
+      this.scene.add(mesh);
+
+      //inicializar renderizador
+      this.renderer = new THREE.WebGLRenderer({ antialias: true });
+      this.renderer.setPixelRatio(window.devicePixelRatio);
+      //para apresentação em full screen: (caso contrário, usar o width e height do container)
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      //direcionar resultados do renderer como canvas
+      container.appendChild(this.renderer.domElement);
+
+      //inicializar controles
+      this.controls = new MapControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.25;
+      this.controls.screenSpacePanning = false;
+      this.controls.maxDistance = 800;
+
+      this.controls.update();
+
+      this.Update();
+    },
+
+    //função "chama a si mesma"
+    Update() {
+      requestAnimationFrame(this.Update);
+
+      this.renderer.render(this.scene, this.camera);
+      this.controls.update();
     },
   },
 };
