@@ -29,6 +29,7 @@ export default {
 
     //função resize que atualiza o tamanho da tela
     window.addEventListener("resize", onWindowResize, false);
+
     function onWindowResize() {
       that.camera.aspect = window.innerWidth / window.innerHeight;
       that.camera.updateProjectionMatrix();
@@ -107,6 +108,7 @@ export default {
       this.controls.update();
 
       this.Update();
+      this.GetGeoJson();
     },
 
     //função "chama a si mesma"
@@ -115,6 +117,15 @@ export default {
 
       this.renderer.render(this.scene, this.camera);
       this.controls.update();
+    },
+
+    GetGeoJson() {
+      fetch("./assets/ufpe.geojson").then((res) => {
+        res.json().then((data) => {
+          console.log(data);
+          //this.LoadBuildings(data)
+        });
+      });
     },
   },
 };
